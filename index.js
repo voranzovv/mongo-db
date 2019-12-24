@@ -5,7 +5,7 @@ mongoose
   .catch(err => console.error("Could not connect to DB", err));
 
 const courseSchema = new mongoose.Schema({
-  name: String,
+  name: {type:String, required:true},
   author: String,
   tags: [String],
   date: { type: Date, default: Date.now },
@@ -15,13 +15,20 @@ const Course = mongoose.model("Course", courseSchema);
 
 async function createCourse() {
   const course = new Course({
-    name: "spring boot",
+    // name: "spring boot",
     author: "voran",
     tags: ["java", "boot"],
     isPublished: true
   });
-  const result = await course.save();
-  console.log(result);
+
+  try{
+    const result = await course.save();
+    console.log(result);
+  }
+  catch(ex){
+    console.log(ex.message);
+    
+  }
 }
 
 async function getCourses() {
@@ -29,7 +36,7 @@ async function getCourses() {
   const pageSize = 10;
   const result = await Course.find({ author: "voran", isPublished: true })
     .find({ author: /^voranz/ })
-    .skip((pageNumber-1) * pageSize)
+    .skip((pageNumber - 1) * pageSize)
     .limit(pageSize)
     .limit(10)
     .sort({ name: 1 })
@@ -37,4 +44,23 @@ async function getCourses() {
   console.log(result);
 }
 
-getCourses();
+async function updateCourse(id) {
+  const result = await Course.findByIdAndUpdate(
+    id,
+    {
+      $set: {
+        author: "traversy media"
+      }
+    },
+    { new: true }
+  );
+  console.log(result);
+}
+
+async function deleteCourse(id){
+const result = await Course.deleteOne({_id:id});
+console.log(result);
+
+}
+
+createCourse();
